@@ -85,6 +85,10 @@ public class AutoScheduler {
 		
 	}
 	
+	/**
+	 * Testing out git 
+	 */
+	
 	private void fillSchedule() {
 		for(int j = 0; j < daysOfWeek.length; j++) {
 			for(int i = 0; i < employees.size(); i++) {
@@ -93,6 +97,7 @@ public class AutoScheduler {
 						if(employees.get(i).getAvailabilityStart(daysOfWeek[j]) <= shifts[k].getStart() && employees.get(i).getAvailabilityEnd(daysOfWeek[j]) >= shifts[k].getEnd()) {
 							employees.get(i).setScheduleShift(daysOfWeek[j], shifts[k].getStart(), shifts[k].getEnd());
 							break;
+							
 						}
 					}
 				}
