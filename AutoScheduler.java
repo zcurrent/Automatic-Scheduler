@@ -85,13 +85,13 @@ public class AutoScheduler {
 		
 	}
 	
-	/**
-	 * Testing out git 
-	 */
 	
 	private void fillSchedule() {
+		//A for loop to go through each day of the week checking shifts with the employee's availability
 		for(int j = 0; j < daysOfWeek.length; j++) {
+			//A for loop to go through each one of the employees, it goes through each employee on the same day then switches to the next day
 			for(int i = 0; i < employees.size(); i++) {
+				//Finally, a for loop to compare the availability of the employee against the stored shifts for the given dayOfWeek
 				for(int k = 0; k < shifts.length; k++) {
 					if(numEmployeesPerShift[k] != 0 && employees.get(i).getAvailabilityStart(daysOfWeek[j]) != employees.get(i).getAvailabilityEnd(daysOfWeek[j])) {
 						if(employees.get(i).getAvailabilityStart(daysOfWeek[j]) <= shifts[k].getStart() && employees.get(i).getAvailabilityEnd(daysOfWeek[j]) >= shifts[k].getEnd()) {
