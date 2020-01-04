@@ -77,6 +77,5 @@ public class Shift {
 		return endMin;
 	}
 	
-	
 
 }

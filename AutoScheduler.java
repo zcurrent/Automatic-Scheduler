@@ -1,6 +1,7 @@
 package auto_scheduler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class AutoScheduler {
@@ -69,14 +70,14 @@ public class AutoScheduler {
 		*the availability*/
 		for(int i = 0; i < numEmployees; i++) {
 			System.out.println("Please enter the first and last name followed by the hours per week for employee " + (i + 1));
-			String name = sc.next() + sc.next();
+			String name = sc.next() + " " + sc.next();
 			int hours = sc.nextInt();
 			addEmployee(name, hours);
 			for(int j = 0; j < daysOfWeek.length; j++) {
 				System.out.println("Please enter the start and end availability, in military standard time, for " + daysOfWeek[j] + ", for " + name);
 				int start = sc.nextInt();
 				int end = sc.nextInt();
-				addAvailability(name, daysOfWeek[i], start, end);
+				addAvailability(name, daysOfWeek[j], start, end);
 			}
 		}
 	}
@@ -126,14 +127,20 @@ public class AutoScheduler {
 		fillSchedule();
 		
 		//Format and print the heading of the schedule
-		System.out.print("                    ");
+		System.out.printf("%18s"," ");
 		
 		for(int i = 0; i < daysOfWeek.length; i++) {
-			System.out.print(daysOfWeek[i]);
-			System.out.print("    ");
+			System.out.printf("%-24s",daysOfWeek[i]);
 		}
 		System.out.println();
 		
+		for(int i = 0; i < employees.size(); i++) {
+			System.out.printf("%-18s", employees.get(i).getName());
+			for(int j = 0; j < daysOfWeek.length; j++ ) {
+					System.out.printf("%-24s", employees.get(i).getStandardScheduleAvailability(daysOfWeek[j]));
+			}
+			System.out.println();
+		}
 		
 	}
 	
@@ -144,24 +151,39 @@ public class AutoScheduler {
 	private void fillSchedule() {
 		//A for loop to go through each day of the week checking shifts with the employee's availability
 		for(int j = 0; j < daysOfWeek.length; j++) {
+			int [] copy = Arrays.copyOf(numEmployeesPerShift, numEmployeesPerShift.length);
 			//A for loop to go through each one of the employees, it goes through each employee on the same day then switches to the next day
 			for(int i = 0; i < employees.size(); i++) {
 				//Finally, a for loop to compare the availability of the employee against the stored shifts for the given dayOfWeek
 				for(int k = 0; k < shifts.length; k++) {
+					//If availability is null, exit inner loop
+					if(employees.get(i).getAvailability(daysOfWeek[j]).equals("null")) {
+						break;
+					}
 					/*if the numEmployeesPerShift is not 0 and the Employee has an availability (determined by them being the same number, presumably 0)
 					*Then check if the start time of the employee's availability is before or equal to the start time of the shift and check if the 
 					*end time is greater than or equal to the end shift. if this is correct then set the shift for the Employee in the schedule and 
 					*decrement the hours for the Employee based on the length of the shift. Then decrement the numEmploueesPerShift for this shift 
 					*and break from the loop of checking shifts to avoid double shifts																*/
-					if(numEmployeesPerShift[k] != 0 && employees.get(i).getAvailabilityStart(daysOfWeek[j]) != employees.get(i).getAvailabilityEnd(daysOfWeek[j])) {
-						if(employees.get(i).getAvailabilityStart(daysOfWeek[j]) <= shifts[k].getStart() && employees.get(i).getAvailabilityEnd(daysOfWeek[j]) >= shifts[k].getEnd()) {
-							employees.get(i).setScheduleShift(daysOfWeek[j], shifts[k].getStart(), shifts[k].getEnd());
-							break;
+					int hrDiff = (shifts[k].getEnd() / 100) - (shifts[k].getStart() / 100);
+					double minDiff = Math.abs((shifts[k].getEndMin() - shifts[k].getStartMin()) / 60);
+					double temp = hrDiff + minDiff;
+					if(numEmployeesPerShift[k] != 0 && 
+							employees.get(i).getAvailabilityStart(daysOfWeek[j]) != employees.get(i).getAvailabilityEnd(daysOfWeek[j]) &&
+							employees.get(i).getHours() - temp >= 0 && employees.get(i).getAvailabilityStart(daysOfWeek[j]) <= shifts[k].getStart() &&
+							employees.get(i).getAvailabilityEnd(daysOfWeek[j]) >= shifts[k].getEnd()) {
+
+			
+								employees.get(i).setScheduleShift(daysOfWeek[j], shifts[k].getStart(), shifts[k].getEnd());
 							
-						}
+								employees.get(i).setHours(employees.get(i).getHours() - temp);
+								numEmployeesPerShift[k]--;
+								break;
+									
 					}
 				}
 			}
+			numEmployeesPerShift = Arrays.copyOf(copy, copy.length);
 		}
 	}
 	
