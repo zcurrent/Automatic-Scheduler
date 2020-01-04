@@ -1,5 +1,6 @@
 package auto_scheduler;
 
+import java.util.Scanner;
 
 public class Shift {
 	
@@ -11,6 +12,8 @@ public class Shift {
 	
 	private int endMin;
 	
+	private Scanner sc;
+	
 	/**
 	 * Constructs and Shift with start time and end time
 	 * @param start - start of Shift in military time
@@ -21,6 +24,19 @@ public class Shift {
 		this.startMin = start % 100;
 		this.endHr = end / 100;
 		this.endMin = end % 100;
+		
+		//If the given time is not valid, loop until they get it right
+		while(endMin > 60 || startMin > 60 || startHr > 24 || endHr > 24) {
+			System.out.println("Please enter a valid time.");
+			sc = new Scanner(System.in);
+			int newStart = sc.nextInt();
+			int newEnd = sc.nextInt();
+			
+			this.startHr = newStart / 100;
+			this.startMin = newStart % 100;
+			this.endHr = newEnd / 100;
+			this.endMin = newEnd % 100;
+		}
 		
 	}
 	

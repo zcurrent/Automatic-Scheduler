@@ -10,7 +10,7 @@ public class Employee {
 
 	private Shift[] schedule;
 
-	public Employee(String name, int hoursPerWeek) {
+	public Employee(String name, double hoursPerWeek) {
 		availabilities = new Shift[7];
 		schedule = new Shift[7];
 

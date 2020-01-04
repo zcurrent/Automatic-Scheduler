@@ -2,6 +2,7 @@ package auto_scheduler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class AutoScheduler {
@@ -48,12 +49,17 @@ public class AutoScheduler {
 		//for loop going through each of the shifts getting start and end time and constructing the shift to store in shifts, 
 		//then it gets the employees wanted for this shift and stores it in numEmployeesPerShift
 		for(int i = 0; i < numShifts; i++) {
+			try {
 			System.out.println("Please enter the start and end time, in Military Standard time, for shift " + (i + 1));
 			int start = sc.nextInt();
 			int end = sc.nextInt();
 			shifts[i] = new Shift(start, end);
 			System.out.println("Please enter the number of employees you would like to work on shift " + (i + 1));
 			numEmployeesPerShift[i] = sc.nextInt();
+			} catch(InputMismatchException e) {
+				System.out.println("Error Occured. Expected different values!");
+				System.exit(0);
+			}
 		}
 		
 		
@@ -69,6 +75,7 @@ public class AutoScheduler {
 		*and another for loop creating that employee and then initializing all of the employee's availability for each day and adds 
 		*the availability*/
 		for(int i = 0; i < numEmployees; i++) {
+			try {
 			System.out.println("Please enter the first and last name followed by the hours per week for employee " + (i + 1));
 			String name = sc.next() + " " + sc.next();
 			int hours = sc.nextInt();
@@ -78,6 +85,9 @@ public class AutoScheduler {
 				int start = sc.nextInt();
 				int end = sc.nextInt();
 				addAvailability(name, daysOfWeek[j], start, end);
+			}
+			} catch (InputMismatchException e) {
+				System.out.println("Error Occured. Different Input Expected!");
 			}
 		}
 	}
