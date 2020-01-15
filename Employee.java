@@ -1,6 +1,6 @@
 package auto_scheduler;
 
-public class Employee {
+public class Employee{
 
 	private double numHoursPerWeek;
 
@@ -146,6 +146,11 @@ public class Employee {
 		} else {
 			return -1;
 		}
+	}
+	
+	
+	public int compareTo(Employee e, String day) {
+		return (this.getAvailabilityEndMin(day) - this.getAvailabilityStart(day)) - (e.getAvailabilityEndMin(day) - e.getAvailabilityStart(day));
 	}
 }
 
