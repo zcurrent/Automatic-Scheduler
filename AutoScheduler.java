@@ -1,7 +1,9 @@
 package auto_scheduler;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -106,6 +108,69 @@ public class AutoScheduler{
 		
 	}
 	
+	public AutoScheduler(String load) {
+		File loadFile = new File(load + ".txt");
+		
+		try {
+			Scanner scanLoadFile = new Scanner(loadFile);
+			
+			int numShifts = scanLoadFile.nextInt();
+			
+			shifts = new Shift[numShifts];
+			
+			remEmployeesPerShift = new int[numShifts][daysOfWeek.length];
+			
+			numEmployeesPerShift = new int[numShifts];
+			
+			employees = new ArrayList<>();
+			
+			for(int i = 0; i < numShifts; i++) {
+				int start = scanLoadFile.nextInt();
+				int end = scanLoadFile.nextInt();
+				shifts[i] = new Shift(start, end);
+				
+				int ithNumEmploys = scanLoadFile.nextInt();
+				numEmployeesPerShift[i] = ithNumEmploys;
+			}
+			
+			
+			for(int i = 0; i < numShifts; i++) {
+				for(int j = 0; j < daysOfWeek.length; j++) {
+					remEmployeesPerShift[i][j] = numEmployeesPerShift[i];
+				}
+			}
+			
+			int numEmployees = scanLoadFile.nextInt();
+			
+			for(int i = 0; i < numEmployees; i++) {
+				String name = scanLoadFile.next() + " " + scanLoadFile.next();
+				double hours = scanLoadFile.nextDouble();
+				
+				addEmployee(name, hours);
+				
+				for(int j = 0; j < daysOfWeek.length; j++) {
+					int start = scanLoadFile.nextInt();
+					int end = scanLoadFile.nextInt();
+					addAvailability(name, daysOfWeek[j], start, end);
+				}
+				
+				
+			}
+			
+			scanLoadFile.close();
+			
+		} catch(FileNotFoundException e) {
+			System.out.println("Incorrect file, Buh Bye!");
+			System.exit(0);
+			
+		} catch(InputMismatchException e) {
+			System.out.println("Found the file, incorrect format!");
+			System.exit(0);
+			
+		}
+		
+	}
+	
 	/**
 	 * Adds numEmployees of type Employee to variable employees. for each employee it asks the desired hours and the availability 
 	 * of each day of the week. Intended to speed up the initialization process
@@ -119,7 +184,7 @@ public class AutoScheduler{
 			try {
 			System.out.println("Please enter the first and last name followed by the hours per week for employee " + (i + 1));
 			String name = sc.next() + " " + sc.next();
-			int hours = sc.nextInt();
+			double hours = sc.nextDouble();
 			addEmployee(name, hours);
 			for(int j = 0; j < daysOfWeek.length; j++) {
 				System.out.println("Please enter the start and end availability, in military standard time, for " + daysOfWeek[j] + ", for " + name);
@@ -138,7 +203,7 @@ public class AutoScheduler{
 	 * @param name - name of the Employee
 	 * @param hoursPerWeek - hours per week for the Employee
 	 */
-	public void addEmployee(String name, int hoursPerWeek) {
+	public void addEmployee(String name, double hoursPerWeek) {
 		employees.add(new Employee(name, hoursPerWeek));
 		
 	}
@@ -193,6 +258,15 @@ public class AutoScheduler{
 			System.out.println();
 		}
 		
+		System.out.printf("%18s"," ");
+		for(int i = 0; i < shifts.length; i++) {
+			for(int j = 0; j < daysOfWeek.length; j++) {
+				System.out.printf("Shift %d: %4d remaining ", (i + 1), remEmployeesPerShift[i][j]);
+			}
+			System.out.println();
+			System.out.printf("%18s"," ");
+		}
+		
 	}
 	
 	/**
@@ -207,15 +281,15 @@ public class AutoScheduler{
 			for(int k = 0; k < numEmployeesPerShift[j]; k++) {
 				for(int l = 0; l < daysOfWeek.length; l++) {
 					for(int m = 0; m < employees.size(); m++) {
-						if(employees.get(m).getAvailability(daysOfWeek[l]).equals("null") ||
+						if(employees.get(m).getAvailability(daysOfWeek[l]).equals("null") &&
 								employees.get(m).getAvailabilityStart(daysOfWeek[k]) == employees.get(m).getAvailabilityEnd(daysOfWeek[k])) {
 							break;
 						}
-						
+								
 						int hrDiff = (shifts[j].getEnd() / 100) - (shifts[j].getStart() / 100);
 						double minDiff = Math.abs((shifts[j].getEndMin() - shifts[j].getStartMin()) / 60);
 						double temp = hrDiff + minDiff;
-						
+							
 						if(employees.get(m).getAvailabilityStart(daysOfWeek[l]) <= shifts[j].getStart() &&
 								employees.get(m).getAvailabilityEnd(daysOfWeek[l]) >= shifts[j].getEnd() &&
 								employees.get(m).compareTo(employees.get(lowestRank), daysOfWeek[l]) <= 0 &&
@@ -225,23 +299,63 @@ public class AutoScheduler{
 							found = true;
 						}
 					}
-					
 					if(found) {
 						int hrDiff = (shifts[j].getEnd() / 100) - (shifts[j].getStart() / 100);
 						double minDiff = Math.abs((shifts[j].getEndMin() - shifts[j].getStartMin()) / 60);
 						double temp = hrDiff + minDiff;
-						
+							
 						employees.get(lowestRank).setScheduleShift(daysOfWeek[l], shifts[j].getStart(), shifts[j].getEnd());
-						
+							
 						employees.get(lowestRank).setHours(employees.get(lowestRank).getHours() - temp);
 						remEmployeesPerShift[j][l]--;
 					}
-					
+						
 					lowestRank = 0;
 					found = false;
 				}
 			}
 		}
+	}
+	
+	
+	public void save(String s) {
+		File save = new File(s + ".txt");
+		Scanner scan = new Scanner(System.in);
 		
+		if(save.exists()) {
+			System.out.println("That file already exists, would you like to overwrite? (y/n)");
+			if(!scan.next().equals("y")) {
+				scan.close();
+				return;
+			}
+		}
+		
+		try {
+			PrintWriter out = new PrintWriter(save);
+			out.println(shifts.length);
+			
+			for(int i = 0; i < shifts.length; i++) {
+				out.print(shifts[i].getStart() + " " + shifts[i].getEnd() + " ");
+				out.print(numEmployeesPerShift[i]);
+				out.println();
+			}
+			
+			out.println(employees.size());
+			
+			for(int i = 0; i < employees.size(); i++) {
+				out.print(employees.get(i).getName() + " " + employees.get(i).getOriginalHours() + " ");
+				for(int j = 0; j < daysOfWeek.length; j++) {
+					out.print(employees.get(i).getAvailabilityStart(daysOfWeek[j]) + " " + employees.get(i).getAvailabilityEnd(daysOfWeek[j]) + " ");
+				}
+				out.println();
+			}
+			
+			out.close();
+		} catch(FileNotFoundException e) {
+			System.out.println("File not found. Error 404");
+		}
+		
+		scan.close();
+	
 	}
 }

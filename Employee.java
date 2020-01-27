@@ -3,6 +3,8 @@ package auto_scheduler;
 public class Employee{
 
 	private double numHoursPerWeek;
+	
+	private double originalHours;
 
 	private String name;
 
@@ -15,6 +17,7 @@ public class Employee{
 		schedule = new Shift[7];
 
 		this.numHoursPerWeek = hoursPerWeek;
+		this.originalHours = hoursPerWeek;
 
 		this.name = name;
 
@@ -26,6 +29,10 @@ public class Employee{
 
 	public double getHours() {
 		return numHoursPerWeek;
+	}
+	
+	public double getOriginalHours() {
+		return originalHours;
 	}
 
 	public void setHours(double hours) {
